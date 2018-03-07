@@ -50,7 +50,7 @@ def buildPosting(postings):
         key = posting[0]
         path = posting[1]
         count = posting[2]
-        print('adding...', key, path, count)
+        #print('adding...', key, path, count)
         if key not in invertedIndex:
             #invertedIndex[key] = []
             invertedIndex[key] = str(str(path) + "," + str(count))
@@ -78,14 +78,11 @@ def getWeight(tokenMap, term, doc, N):
 def getWeightForDatabase(term, N):
     token = Token.objects.get(word=term)
     token = token.path.split('|')
-    print(token)
     df=len(token) #document freqnency
 
     ranking = [] #ranking
     for item in token:
-        print(item)
         item = item.split(',')
-        print(item)
         weight = math.log10(1 + int(item[1])) * math.log10(N/df)
         ranking.append([item[0], weight])
     sort=sorted(ranking,key=lambda e:e[1],reverse=True)
@@ -110,7 +107,7 @@ def initialDatabase():
         N += len(cur_files)
 
     for f in files:
-        print('scanning... ' + f)
+        #print('scanning... ' + f)
         curr_token = tokenize(f)
         curr_count = computeWordFrequencies(curr_token)
         posting = []

@@ -1,0 +1,28 @@
+{% extends "inverted_index/base.html" %}
+
+{% block content %}
+    <form method='post'>
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Search">
+    </form>
+    <ul>
+        {% for result in results %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3>
+                        <a href="{% url 'inverted_index:home_page' %}">
+                            {{ result }}
+                        </a>
+                        </small>
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    {{ entry.text|linebreaks }}
+                </div>
+            </div> <!-- panel -->
+        {% empty %}
+            <li>---</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

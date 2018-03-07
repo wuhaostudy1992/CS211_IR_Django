@@ -1,0 +1,26 @@
+{% extends "inverted_index/base.html" %}
+
+{% block header %}
+    <h1>Tokens</h1>
+{% endblock header %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Build">
+</form>
+
+<ul>
+    {% for token in tokens %}
+        <li>
+            <h3>
+                <a>{{ token }}</a>
+            </h3>
+        </li>
+    {% empty %}
+        <li>---</li>
+    {% endfor %}
+</ul>
+{% endblock content %}

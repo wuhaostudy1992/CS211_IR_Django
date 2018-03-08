@@ -68,24 +68,43 @@ def getWeight(tokenMap, term, doc, N):
             tf += 1
     df = len(postings)
     weight = math.log10(1 + tf) * math.log10(N/df)
-#print('postings: ', postings)
-#print('N: ', N)
-#print('tf: ', tf)
-#print('df: ', df)
-#print('weight: ', weight)
     return weight
     
-def getWeightForDatabase(term, N):
-    token = Token.objects.get(word=term)
-    token = token.path.split('|')
-    df=len(token) #document freqnency
-
+def getWeightForDatabase(terms, N):
+    terms = terms.split(' ')
+    postings = []
+    for i in range(len(terms)):
+        token = Token.objects.get(word=terms[i]).path.split('|')
+        tokens = []
+        for item in token:
+            item = item.split(',')
+            tokens.append(item)
+        #df=len(token) #document freqnency
+        tokens = dict(tokens)
+        #postings.append([token, tf])
+        postings.append(tokens)
+    print(len(postings))
+    
+    intersect = dict()
+    temp = dict()
+    for i in range(len(postings)):
+        if not temp:
+            temp = postings[i]
+            intersect = postings[i]
+            print(temp)
+        else:
+            intersect = dict()
+            for k in set(temp.keys())&set(postings[i].keys()):
+                intersect[k] = temp.get(k) + postings[i].get(k)
+            temp = intersect
+    df=len(temp) #document freqnency
+    
     ranking = [] #ranking
-    for item in token:
-        item = item.split(',')
-        weight = math.log10(1 + int(item[1])) * math.log10(N/df)
-        ranking.append([item[0], weight])
+    for key, value in temp.items():
+        weight = math.log10(1 + int(value)) * math.log10(N/df)
+        ranking.append([key, weight])
     sort=sorted(ranking,key=lambda e:e[1],reverse=True)
+
     return sort[:50]
 
 def readPosting(TextFilePath):
@@ -93,6 +112,19 @@ def readPosting(TextFilePath):
     index=dict()
     index=eval(file)
     return index
+    
+def getIntersect(tokenMap, query):
+    terms=query.split(' ')
+    postings=[]
+    intersect=dict(tokenMap[terms[0]])
+    for i in range(0,len(terms)):
+        postings.append(tokenMap[terms[i]])
+    for i in range(1,len(terms)):
+        temp=intersect
+        intersect=dict()
+        for k in set(temp.keys())&set(dict(postings[i]).keys()):
+            intersect[k]=temp.get(k) + dict(postings[i]).get(k)
+    return intersect
     
 def initialDatabase():
     #start_time = time.time()
@@ -126,9 +158,3 @@ def initialDatabase():
         token_list.append(token)
         
     Token.objects.bulk_create(token_list)
-    """
-    with open('index.txt', 'w') as file:
-         file.write(json.dumps(tokenMap)) # use `json.loads` to do the reverse
-
-    print("--- Build the posting: %s seconds ---" % (time.time() - start_time))
-    """

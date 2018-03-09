@@ -83,29 +83,26 @@ def getWeightForDatabase(terms, N):
         tokens = dict(tokens)
         #postings.append([token, tf])
         postings.append(tokens)
-    print(len(postings))
     
     intersect = dict()
-    temp = dict()
     for i in range(len(postings)):
-        if not temp:
-            temp = postings[i]
+        if not intersect:
             intersect = postings[i]
-            print(temp)
         else:
-            intersect = dict()
-            for k in set(temp.keys())&set(postings[i].keys()):
-                intersect[k] = temp.get(k) + postings[i].get(k)
-            temp = intersect
-    df=len(temp) #document freqnency
+            temp = dict()
+            for k in set(intersect.keys())&set(postings[i].keys()):
+                temp[k] = int(intersect.get(k)) + int(postings[i].get(k))
+            intersect = temp
+    #print(intersect)
+    df=len(intersect) #document freqnency
     
     ranking = [] #ranking
-    for key, value in temp.items():
+    for key, value in intersect.items():
         weight = math.log10(1 + int(value)) * math.log10(N/df)
         ranking.append([key, weight])
     sort=sorted(ranking,key=lambda e:e[1],reverse=True)
 
-    return sort[:50]
+    return sort
 
 def readPosting(TextFilePath):
     file=open(TextFilePath).read()

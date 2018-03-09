@@ -27,13 +27,17 @@ def home_page(request):
     
 def queryResult(term):
     N = 37497
+    start_time = time.time()
     ranking = af.getWeightForDatabase(term, N)
-    return ranking
+    print("--- Search time: %s seconds ---" % (time.time() - start_time))
+    return ranking[:50]
     
 def tokens(request):
     """Show all tokens"""
     if request.method == 'POST':
+        start_time = time.time()
         af.initialDatabase()
+        print("--- Build the database takes: %s seconds ---" % (time.time() - start_time))
 
     tokens = Token.objects.all()[:50]
     context = {'tokens': tokens}

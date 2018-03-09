@@ -6,4 +6,5 @@ urlpatterns = [
     # Home page
     url(r'^$', views.home_page, name='home_page'),
     url(r'^tokens/$', views.tokens, name='tokens'),
+    url(r'^mapping/$', views.mapping, name='mapping'),
 ]

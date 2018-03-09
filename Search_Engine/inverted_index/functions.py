@@ -9,7 +9,8 @@ from os import listdir
 from os.path import isfile, join
 import json
 import time
-from .models import Token
+from .models import Token, Mapping
+import numpy as np
 
 def tokenize(path):
     """
@@ -70,11 +71,14 @@ def getWeight(tokenMap, term, doc, N):
     weight = math.log10(1 + tf) * math.log10(N/df)
     return weight
     
-def getWeightForDatabase(terms, N):
-    terms = terms.split(' ')
+def getWeightForDatabase(terms, N, filename):
+    terms = terms.lower().split(' ')
     postings = []
     for i in range(len(terms)):
-        token = Token.objects.get(word=terms[i]).path.split('|')
+        try:
+            token = Token.objects.get(word=terms[i]).path.split('|')
+        except:
+            continue
         tokens = []
         for item in token:
             item = item.split(',')
@@ -93,7 +97,7 @@ def getWeightForDatabase(terms, N):
             for k in set(intersect.keys())&set(postings[i].keys()):
                 temp[k] = int(intersect.get(k)) + int(postings[i].get(k))
             intersect = temp
-    #print(intersect)
+    
     df=len(intersect) #document freqnency
     
     ranking = [] #ranking
@@ -101,7 +105,14 @@ def getWeightForDatabase(terms, N):
         weight = math.log10(1 + int(value)) * math.log10(N/df)
         ranking.append([key, weight])
     sort=sorted(ranking,key=lambda e:e[1],reverse=True)
-
+    
+    with open(filename, 'r') as f:
+        data = json.load(f)
+    for item in sort:
+        #item[0] = Mapping.objects.get(file_name=item[i]).URL
+        item[0] = data[item[0]]
+    
+    sort = np.array(sort)[:, 0]
     return sort
 
 def readPosting(TextFilePath):
@@ -155,3 +166,13 @@ def initialDatabase():
         token_list.append(token)
         
     Token.objects.bulk_create(token_list)
+    
+def initialMapping(filename):
+    with open(filename, 'r') as f:
+        data = json.load(f)
+    mapping_list = []
+    for key, value in data.items():
+        mapping = Mapping(file_name=key, URL=value)
+        mapping_list.append(mapping)
+        
+    Mapping.objects.bulk_create(mapping_list)

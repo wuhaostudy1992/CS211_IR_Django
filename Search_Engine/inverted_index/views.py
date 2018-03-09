@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Token
+from .models import Token, Mapping
 from .forms import SearchForm
 from . import functions as af
 from django.http import HttpResponseRedirect, Http404
@@ -27,9 +27,11 @@ def home_page(request):
     
 def queryResult(term):
     N = 37497
+    filename = 'bookkeeping.json'
     start_time = time.time()
-    ranking = af.getWeightForDatabase(term, N)
+    ranking = af.getWeightForDatabase(term, N, filename)
     print("--- Search time: %s seconds ---" % (time.time() - start_time))
+    #ranking = np.array(ranking)
     return ranking[:50]
     
 def tokens(request):
@@ -42,3 +44,11 @@ def tokens(request):
     tokens = Token.objects.all()[:50]
     context = {'tokens': tokens}
     return render(request, 'inverted_index/tokens.html', context)
+    
+def mapping(request):
+    """map file path to URL"""
+    filename = 'bookkeeping.json'
+    if request.method == 'POST':
+        # Create mappings
+        af.initialMapping(filename)
+    return render(request, 'inverted_index/mapping.html', None)

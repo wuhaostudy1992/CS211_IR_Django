@@ -7,21 +7,33 @@
         <input type="submit" value="Search">
     </form>
     <ul>
-        {% for result in results %}
+        {% if ranks %}
+        <a>
+            About {{ totalResult }} results ({{ consumedtime }} seconds)
+        </a>
+        {% endif %}
+    </ul>
+    <ul>
+        {% for link, weight in ranks.items %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3>
-                        <!--><a href="{% url 'inverted_index:home_page' %}"></!-->
-                        <a href="//{{result}}" target="view_frame">
-                            {{ result }}
-                        </a>
-                        </small>
+                        <ul>
+                            <a href="//{{link}}" target="view_frame">
+                                {{ link }}
+                            </a>
+                        </ul>
+                        <ul>
+                            <small>
+                                {{weight}}
+                            </small>
+                        </ul>
                     </h3>
                 </div>
                 <div class="panel-body">
                     {{ entry.text|linebreaks }}
                 </div>
-            </div> <!-- panel -->
+            </div>
         {% empty %}
             <li>---</li>
         {% endfor %}

@@ -10,7 +10,9 @@ from os.path import isfile, join
 import json
 import time
 from .models import Token, Mapping
-import numpy as np
+#import numpy as np
+
+mapping = dict()
 
 def tokenize(path):
     """
@@ -72,6 +74,12 @@ def getWeight(tokenMap, term, doc, N):
     return weight
     
 def getWeightForDatabase(terms, N, filename):
+    """
+    get weight of different terms
+    terms:
+    N: total number of files
+    filename: mappings from file path to URL
+    """
     terms = terms.lower().split(' ')
     postings = []
     for i in range(len(terms)):
@@ -106,13 +114,21 @@ def getWeightForDatabase(terms, N, filename):
         ranking.append([key, weight])
     sort=sorted(ranking,key=lambda e:e[1],reverse=True)
     
-    with open(filename, 'r') as f:
-        data = json.load(f)
+    '''
+    mappings = Mapping.objects.all()
+    data = dict()
+    for item in mappings:
+        data[item.file_name] = item.URL
+    '''
+    global mapping
+    if not mapping:
+        with open(filename, 'r') as f:
+            mapping = json.load(f)
     for item in sort:
         #item[0] = Mapping.objects.get(file_name=item[i]).URL
-        item[0] = data[item[0]]
+        item[0] = mapping[item[0]]
     
-    sort = np.array(sort)[:, 0]
+    #sort = np.array(sort)[:, 0]
     return sort
 
 def readPosting(TextFilePath):

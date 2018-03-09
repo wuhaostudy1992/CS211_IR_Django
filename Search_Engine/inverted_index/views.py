@@ -10,6 +10,7 @@ from os.path import isfile, join
 import json
 import time
 import operator
+import numpy as np
 
 def home_page(request):
     """The home page for search engine."""
@@ -20,7 +21,10 @@ def home_page(request):
         form = SearchForm(request.POST)
         if form.is_valid():
             query = form.cleaned_data['query']
-            context = {'form': form, 'results': queryResult(query)}
+            start_time = time.time()
+            rank = dict(queryResult(query))
+            end_time = time.time()
+            context = {'form': form, 'ranks': rank, 'consumedtime' : end_time - start_time, 'totalResult': len(rank)}
             return render(request, 'inverted_index/home_page.html', context)
     context = {'form': form}
     return render(request, 'inverted_index/home_page.html', context)
@@ -32,7 +36,7 @@ def queryResult(term):
     ranking = af.getWeightForDatabase(term, N, filename)
     print("--- Search time: %s seconds ---" % (time.time() - start_time))
     #ranking = np.array(ranking)
-    return ranking[:50]
+    return ranking
     
 def tokens(request):
     """Show all tokens"""

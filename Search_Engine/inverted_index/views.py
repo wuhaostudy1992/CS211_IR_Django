@@ -34,6 +34,7 @@ def queryResult(term):
     filename = 'bookkeeping.json'
     start_time = time.time()
     ranking = af.getWeightForDatabase(term, N, filename)
+    #ranking = af.calculateScore(term, N, filename)
     print("--- Search time: %s seconds ---" % (time.time() - start_time))
     #ranking = np.array(ranking)
     return ranking
